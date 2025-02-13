@@ -1,111 +1,92 @@
 "use client";
 
-import { SignedIn, SignedOut } from "@clerk/nextjs";
+import React, { useEffect, useRef } from "react";
+import { useAnimation, useInView, motion } from "framer-motion";
 import Link from "next/link";
 
-export default function Home() {
+const VideoSummarizerHero: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-black text-white">
-      {/* Header */}
-      <header className="bg-gray-900 py-6 shadow-lg">
-        <div className="container mx-auto px-6 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">My App</h1>
-          <div className="flex gap-4">
-            <SignedOut>
-              <Link
-                href="/sign-in"
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition"
-              >
-                Sign In
+    <section className="text-white overflow-hidden bg-gray-900 px-8 py-24 md:px-12 md:py-32 h-screen">
+      <div className="relative mx-auto max-w-5xl text-center">
+        <div className="relative z-10">
+          <Reveal>
+            <h1 className="text-6xl font-black text-white md:text-8xl">
+              AI Video Summarizer<span className="text-red-500">.</span>
+            </h1>
+          </Reveal>
+          <Reveal>
+            <h2 className="my-4 text-2xl text-gray-400 md:text-4xl">
+              Save time,{" "}
+              <span className="font-semibold text-red-500">
+                get the key points
+              </span>
+            </h2>
+          </Reveal>
+          <Reveal>
+            <p className="max-w-xl mx-auto text-sm text-gray-300 md:text-base">
+              Upload a video or paste a link, and let our AI generate a concise
+              summary with the most important details. Perfect for students,
+              professionals, and anyone who values efficiency.
+            </p>
+          </Reveal>
+          <Reveal>
+            <div className="mt-6 flex flex-col md:flex-row gap-4 justify-center">
+              <Link href="/sign-up">
+                <button className="rounded bg-red-600 px-6 py-3 text-white font-medium transition-all hover:bg-red-700 active:scale-95">
+                  Get Started
+                </button>
               </Link>
-              <Link
-                href="/sign-up"
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md transition"
-              >
-                Sign Up
+              <Link href="/sign-in">
+                <button className="rounded border border-red-600 px-6 py-3 text-red-600 font-medium transition-all hover:bg-red-600 hover:text-white active:scale-95">
+                  Sign In
+                </button>
               </Link>
-            </SignedOut>
-            <SignedIn>
-              <Link
-                href="/dashboard"
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition"
-              >
-                Dashboard
-              </Link>
-            </SignedIn>
-          </div>
+            </div>
+          </Reveal>
         </div>
-      </header>
+      </div>
+    </section>
+  );
+};
 
-      {/* Hero Section */}
-      <main className="flex-1 flex flex-col items-center justify-center text-center px-6">
-        <h2 className="text-4xl sm:text-6xl font-bold mb-6">
-          Welcome to My App
-        </h2>
-        <p className="text-lg text-gray-400 mb-8">
-          Build modern and secure web applications with ease.
-        </p>
-        <SignedOut>
-          <div className="flex gap-4">
-            <Link
-              href="/sign-up"
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition"
-            >
-              Get Started
-            </Link>
-            <Link
-              href="/sign-in"
-              className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-md transition"
-            >
-              Learn More
-            </Link>
-          </div>
-        </SignedOut>
-        <SignedIn>
-          <p className="text-lg text-gray-400 mt-4">
-            You&apos;re signed in. Go to your{" "}
-            <Link
-              href="/dashboard"
-              className="text-indigo-400 hover:text-indigo-300 font-medium"
-            >
-              Dashboard
-            </Link>
-            .
-          </p>
-        </SignedIn>
-      </main>
+const Reveal: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true });
+  const mainControls = useAnimation();
+  const slideControls = useAnimation();
 
-      {/* Footer */}
-      <footer className="bg-gray-900 py-6">
-        <div className="container mx-auto px-6 text-center">
-          <p className="text-gray-400">
-            © {new Date().getFullYear()} My App. All rights reserved.
-          </p>
-          <div className="flex justify-center gap-4 mt-4">
-            <Link
-              href="https://twitter.com"
-              target="_blank"
-              className="text-gray-400 hover:text-white"
-            >
-              Twitter
-            </Link>
-            <Link
-              href="https://github.com"
-              target="_blank"
-              className="text-gray-400 hover:text-white"
-            >
-              GitHub
-            </Link>
-            <Link
-              href="https://linkedin.com"
-              target="_blank"
-              className="text-gray-400 hover:text-white"
-            >
-              LinkedIn
-            </Link>
-          </div>
-        </div>
-      </footer>
+  useEffect(() => {
+    if (isInView) {
+      mainControls.start("visible");
+      slideControls.start("visible");
+    }
+  }, [isInView]);
+
+  return (
+    <div ref={ref} className="relative w-fit overflow-hidden">
+      <motion.div
+        variants={{
+          hidden: { opacity: 0, y: 75 },
+          visible: { opacity: 1, y: 0 },
+        }}
+        initial="hidden"
+        animate={mainControls}
+        transition={{ duration: 0.5, delay: 0.25 }}
+      >
+        {children}
+      </motion.div>
+      <motion.div
+        variants={{
+          hidden: { left: 0 },
+          visible: { left: "100%" },
+        }}
+        initial="hidden"
+        animate={slideControls}
+        transition={{ duration: 0.5, ease: "easeIn" }}
+        className="absolute bottom-1 left-0 right-0 top-1 z-20 bg-red-600"
+      />
     </div>
   );
-}
+};
+
+export default VideoSummarizerHero;
